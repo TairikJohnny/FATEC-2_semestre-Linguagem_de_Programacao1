@@ -8,18 +8,16 @@ public class Planeta {
 	private double menor_temperatura;
 	private double maior_temperatura;
 	private int quantidade_satelite;
-	private String nome_satelite;
 	
 	
 	public Planeta(String nome, String cor, String galaxia, double menor_temperatura, double maior_temperatura,
-			int quantidade_satelite, String nome_satelite) {
+			int quantidade_satelite) {
 		this.nome = nome;
 		this.cor = cor;
 		this.galaxia = galaxia;
 		this.menor_temperatura = menor_temperatura;
 		this.maior_temperatura = maior_temperatura;
 		this.quantidade_satelite = quantidade_satelite;
-		this.nome_satelite = nome_satelite;
 	}
 	
 	public Planeta() {
@@ -72,13 +70,5 @@ public class Planeta {
 	
 	public void setQuantidade_satelite(int quantidade_satelite) {
 		this.quantidade_satelite = quantidade_satelite;
-	}
-	
-	public String getNome_satelite() {
-		return nome_satelite;
-	}
-	
-	public void setNome_satelite(String nome_satelite) {
-		this.nome_satelite = nome_satelite;
 	}
 }

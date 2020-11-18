@@ -3,8 +3,9 @@ package exercicio03;
 public class AlunoFatecSJC {
 	private String nome;
 	private String curso;
-	private String periodo;
-	
+	private String periodo;	
+
+
 	//contrutor
 	public AlunoFatecSJC(String nome, String curso, String periodo) {
 		this.nome = nome;
@@ -42,7 +43,7 @@ public class AlunoFatecSJC {
 	public String getPeriodo() {
 		return periodo;
 	}
-	
+
 	
 	//metodos
 	public void estudar() {

@@ -9,16 +9,26 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import exercicio03.AlunoFatecSJC;
 import exercicio03.Planeta;
+import jdbc.FabricaConexao;
+
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.awt.event.ActionEvent;
 
 public class FormPlaneta extends JFrame {
-
+	
+	protected static final Planeta Planeta = null;
 	private JPanel contentPane;
 	private JTextField nomeField;
 	private JTextField corField;
@@ -26,7 +36,6 @@ public class FormPlaneta extends JFrame {
 	private JTextField menorField;
 	private JTextField maiorField;
 	private JTextField quantidadeField;
-	private JTextField nomesatelitesField;
 	private ArrayList<Planeta> array_planeta;
 
 	/**
@@ -84,10 +93,6 @@ public class FormPlaneta extends JFrame {
 		lblNewLabel_5.setBounds(10, 161, 166, 14);
 		contentPane.add(lblNewLabel_5);
 		
-		JLabel lblNewLabel_6 = new JLabel("NOMES DOS SATELITES:");
-		lblNewLabel_6.setBounds(10, 186, 166, 14);
-		contentPane.add(lblNewLabel_6);
-		
 		JLabel lblNewLabel_7 = new JLabel("DESCOBRIMOS UM NOVO PLANETA");
 		lblNewLabel_7.setFont(new Font("Arial", Font.BOLD, 14));
 		lblNewLabel_7.setBounds(76, 18, 285, 14);
@@ -123,15 +128,10 @@ public class FormPlaneta extends JFrame {
 		contentPane.add(quantidadeField);
 		quantidadeField.setColumns(10);
 		
-		nomesatelitesField = new JTextField();
-		nomesatelitesField.setBounds(175, 183, 376, 20);
-		contentPane.add(nomesatelitesField);
-		nomesatelitesField.setColumns(10);
-		
 		JButton btnSalvar = new JButton("SALVAR");
 		btnSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				salvarPlaneta();
+				save();
 			}
 		});
 		btnSalvar.setBounds(17, 227, 89, 23);
@@ -140,10 +140,16 @@ public class FormPlaneta extends JFrame {
 		JButton btnProcurar = new JButton("PROCURAR");
 		btnProcurar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				procurarPlaneta();
+				//procurarPlaneta();
+				try {
+					search();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
-		btnProcurar.setBounds(220, 227, 115, 23);
+		btnProcurar.setBounds(116, 227, 115, 23);
 		contentPane.add(btnProcurar);
 		
 		JButton btnFechar = new JButton("FECHAR");
@@ -154,8 +160,36 @@ public class FormPlaneta extends JFrame {
 		});
 		btnFechar.setBounds(462, 227, 89, 23);
 		contentPane.add(btnFechar);
+		
+		JButton btnAtualizar = new JButton("ATUALIZAR");
+		btnAtualizar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					update();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnAtualizar.setBounds(241, 227, 102, 23);
+		contentPane.add(btnAtualizar);
+		
+		JButton btnExcluir = new JButton("EXCLUIR");
+		btnExcluir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					delete();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnExcluir.setBounds(363, 227, 89, 23);
+		contentPane.add(btnExcluir);
 	}
-	
+
 	public void salvarPlaneta() {
 		
 		Planeta planeta = new Planeta();
@@ -166,7 +200,6 @@ public class FormPlaneta extends JFrame {
 		planeta.setMenor_temperatura(Double.valueOf((menorField.getText())));
 		planeta.setMaior_temperatura(Double.valueOf(maiorField.getText()));
 		planeta.setQuantidade_satelite(Integer.valueOf(quantidadeField.getText()));
-		planeta.setNome_satelite(nomesatelitesField.getText());
 		array_planeta.add(planeta);
 		limparCampos();
 	}
@@ -178,7 +211,6 @@ public class FormPlaneta extends JFrame {
 		menorField.setText("");
 		maiorField.setText("");
 		quantidadeField.setText("");
-		nomesatelitesField.setText("");
 	}
 	
 	public void procurarPlaneta() {
@@ -196,10 +228,118 @@ public class FormPlaneta extends JFrame {
 				menorField.setText(String.valueOf(planeta.getMenor_temperatura()));
 				maiorField.setText(String.valueOf(planeta.getMaior_temperatura()));
 				quantidadeField.setText(String.valueOf(planeta.getQuantidade_satelite()));
-				nomesatelitesField.setText(String.valueOf(planeta.getNome_satelite()));
 				break;
 			}
 		}
 		
 	}
+	
+	public void save() {
+        
+        try {
+			post(nomeField.getText(), corField.getText(), galaxiaField.getText(), Double.parseDouble(menorField.getText()), Double.parseDouble(maiorField.getText()), Integer.parseInt(quantidadeField.getText()));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void post(String nome, String cor, String galaxia, double menor_temperatura, double maior_temperatura, int quantidade_satelite) throws Exception {
+		try {
+			Connection conexao = FabricaConexao.getConexao();
+
+			String sql = "INSERT INTO planeta VALUES (?,?,?,?,?,?)";
+			PreparedStatement posted = conexao.prepareStatement(sql);
+			posted.setString(1, nome);
+			posted.setString(2, cor);
+			posted.setString(3, galaxia);
+			posted.setDouble(4, menor_temperatura);
+			posted.setDouble(5, maior_temperatura);
+			posted.setInt(6, quantidade_satelite);
+			posted.executeUpdate();
+		}
+		catch (Exception e) {
+			System.out.println("catch do post " + e);
+		}
+		finally {
+			System.out.println("dados inseridos");
+		}
+	}
+	
+	public void search() throws SQLException {
+		
+    	Connection conexao = FabricaConexao.getConexao();
+    	
+    	// Atribuindo oque foi digitado no textField a variavel x
+    	String x = nomeField.getText();
+    	
+    	// Pesquisando no BD oque foi digitado no textField
+		String sql = "SELECT * FROM planeta WHERE nome='"+ x + "'";
+		
+		Statement stmt = conexao.createStatement();
+		
+		// ESTA SENDO ATRIBUIDO A VARIAVEL RESULTADO O RETORNO DA VARIAVEL SQL COM A CONSULTA DO BANCO
+		ResultSet resultado = stmt.executeQuery(sql);
+		
+		resultado.next();
+		
+		// Setando o retorno do BD nos textField
+		nomeField.setText(resultado.getString("nome"));
+		corField.setText(resultado.getString("cor"));
+		galaxiaField.setText(resultado.getString("galaxia"));
+		menorField.setText(resultado.getString("menor_temperatura"));
+		maiorField.setText(resultado.getString("maior_temperatura"));
+		quantidadeField.setText(resultado.getString("quantidade_satelite"));
+		
+		conexao.close();
+	}
+	
+    public void update() throws SQLException {
+    	
+    	Connection conexao = FabricaConexao.getConexao();
+    	
+    	// Atribuindo oque foi digitado no textField a variavel x
+    	String x = nomeField.getText();
+		
+    	// Faz o Update nos campos curso e periodo atraves do nome que foi passado, nome nao muda pois é chave primaria
+		String updateSQL = "UPDATE planeta SET cor = ?, galaxia = ?, menor_temperatura = ?, maior_temperatura = ?, quantidade_satelite = ? WHERE nome='"+ x + "'";
+		
+		// Recebendo o updateSQL
+		PreparedStatement stmt = conexao.prepareStatement(updateSQL);		
+		
+		// Setando no banco
+		stmt.setString(1, corField.getText());
+		stmt.setString(2, galaxiaField.getText());
+		stmt.setString(3, menorField.getText());
+		stmt.setString(4, maiorField.getText());
+		stmt.setString(5, quantidadeField.getText());
+		stmt.executeUpdate();
+		
+		// Fechando conexoes
+		stmt.close();
+		conexao.close();
+    }
+    
+    public void delete() throws SQLException {
+    	
+    	Connection conexao = FabricaConexao.getConexao();
+    	
+    	// Atribuindo oque foi digitado no textField a variavel x
+    	String x = nomeField.getText();
+    	
+    	String deleteSQL = "DELETE FROM planeta WHERE nome='"+ x + "'";
+    	
+    	PreparedStatement stmt = conexao.prepareStatement(deleteSQL);
+    	
+    	stmt.execute();
+    	
+    	nomeField.setText("");
+    	corField.setText("");
+    	galaxiaField.setText("");
+    	menorField.setText("");
+    	maiorField.setText("");
+    	quantidadeField.setText("");
+    	
+    	conexao.close(); 	
+    }
 }
